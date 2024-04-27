@@ -1,0 +1,2 @@
+ssh_identity_key_path: ~/.ssh/id_rsa.pub
+ssh_port: 58372

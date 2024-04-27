@@ -1,0 +1,7 @@
+- name: Include security task files
+  include_tasks: "{{ task_name }}.yml"
+  loop: 
+    - gpg
+    - ssh
+  loop_control:
+    loop_var: task_name

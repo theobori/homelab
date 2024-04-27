@@ -1,0 +1,59 @@
+- name: Create the traefik application directory
+  ansible.builtin.file:
+    path: "{{ docker_dir }}/traefik/data"
+    state: directory
+    mode: 0755
+
+- name: Copy traefik.yml configuration file
+  ansible.builtin.template:
+    src: traefik/traefik.yml.j2
+    dest: "{{ docker_dir }}/traefik/data/traefik.yml"
+    mode: '0644'
+
+- name: Copy traefik configuration directory
+  ansible.builtin.copy:
+    src: traefik/conf
+    dest: "{{ docker_dir }}/traefik/data"
+
+- name: Check if acme.json file exists
+  ansible.builtin.stat:
+    path: "{{ docker_dir }}/traefik/data/acme.json"
+  register: acme_json_stat
+
+- name: Create acme.json file if it doesn't exist
+  ansible.builtin.file:
+    path: "{{ docker_dir }}/traefik/data/acme.json"
+    state: touch
+    mode: '0600'
+  when: acme_json_stat.stat.exists == false
+
+- name: Deploy traefik with docker container
+  community.docker.docker_container:
+    name: traefik
+    image: traefik:latest
+    restart_policy: unless-stopped
+    state: started
+    security_opts:
+      - no-new-privileges:true
+    networks:
+      - name: homelab
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - "{{ docker_dir }}/traefik/data/acme.json:/acme.json"
+      - "{{ docker_dir }}/traefik/data/conf:/etc/traefik/conf"
+      - "{{ docker_dir }}/traefik/data/traefik.yml:/traefik.yml:ro"
+    env:
+      DUCKDNS_TOKEN: "{{ duckdns_token }}"
+    labels:
+      traefik.enable: "true"
+      traefik.http.routers.traefik.entrypoints: "http"
+      traefik.http.routers.traefik.rule: "Host(`traefik.{{ domain }}`)"
+      traefik.http.routers.traefik-secure.middlewares: "authentik@file"
+      traefik.http.routers.traefik-secure.entrypoints: "https"
+      traefik.http.routers.traefik-secure.rule: "Host(`traefik.{{ domain }}`)"
+      traefik.http.routers.traefik-secure.tls: "true"
+      traefik.http.routers.traefik-secure.service: "api@internal"
+      traefik.http.routers.traefik-secure.tls.certresolver: letsencrypt

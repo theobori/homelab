@@ -1,0 +1,2 @@
+base_dir: /usr/local/homelab
+docker_dir: "{{ base_dir }}/applications"

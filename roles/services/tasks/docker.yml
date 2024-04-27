@@ -1,0 +1,5 @@
+- name: Create a homelab docker network
+  community.docker.docker_network:
+    name: homelab
+    state: present
+    driver: bridge

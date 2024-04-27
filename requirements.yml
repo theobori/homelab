@@ -1,0 +1,12 @@
+---
+roles:
+  - name: nickjj.docker
+  - name: weareinteractive.ufw
+    # Taken from GitHub because ansible galaxy servers dont have the latest version
+  - src: https://github.com/vitalk/ansible-secure-ssh
+    name: vitalk.secure-ssh
+  - src: https://github.com/geerlingguy/ansible-role-certbot.git
+    name: geerlingguy.certbot
+
+collections:
+  - name: community.docker

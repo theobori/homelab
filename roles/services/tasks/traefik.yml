@@ -27,7 +27,7 @@
     mode: '0600'
   when: acme_json_stat.stat.exists == false
 
-- name: Deploy traefik with docker container
+- name: Create Traefik Docker container
   community.docker.docker_container:
     name: traefik
     image: traefik:latest
@@ -49,11 +49,11 @@
       DUCKDNS_TOKEN: "{{ duckdns_token }}"
     labels:
       traefik.enable: "true"
-      traefik.http.routers.traefik.entrypoints: "http"
-      traefik.http.routers.traefik.rule: "Host(`traefik.{{ domain }}`)"
       traefik.http.routers.traefik-secure.middlewares: "authentik@file"
       traefik.http.routers.traefik-secure.entrypoints: "https"
       traefik.http.routers.traefik-secure.rule: "Host(`traefik.{{ domain }}`)"
       traefik.http.routers.traefik-secure.tls: "true"
       traefik.http.routers.traefik-secure.service: "api@internal"
       traefik.http.routers.traefik-secure.tls.certresolver: letsencrypt
+      traefik.http.routers.traefik-secure.tls.domains[0].main: "{{ domain }}"
+      traefik.http.routers.traefik-secure.tls.domains[0].sans: "*.{{ domain }}"

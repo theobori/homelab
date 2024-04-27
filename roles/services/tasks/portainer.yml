@@ -1,0 +1,41 @@
+- name: Create the Portainer backend volumes
+  docker_volume:
+    name: portainer_data
+    state: present
+    driver: local
+
+- name: Create Portainer Docker container
+  community.docker.docker_container:
+    name: portainer
+    image: portainer/portainer-ce:latest
+    state: started
+    restart_policy: unless-stopped
+    volumes:
+      - "/var/run/docker.sock:/var/run/docker.sock"
+      - "portainer_data:/data"
+    networks:
+      - name: homelab
+    labels:
+      traefik.enable: "true"
+
+      # Frontend
+      traefik.http.routers.portainer-secure.entrypoints: "https"
+      traefik.http.routers.portainer-secure.rule: "Host(`portainer.{{ domain }}`)"
+      traefik.http.routers.portainer-secure.tls: "true"
+      traefik.http.routers.portainer-secure.service: "portainer-frontend-svc"
+      traefik.http.services.portainer-frontend-svc.loadBalancer.server.port: "9000"
+      traefik.http.routers.portainer-secure.tls.certresolver: letsencrypt
+      traefik.http.routers.portainer-secure.tls.domains[0].main: "{{ domain }}"
+      traefik.http.routers.portainer-secure.tls.domains[0].sans: "*.{{ domain }}"
+
+      # Edge
+      traefik.http.routers.portainer-edge-secure.entrypoints: "https"
+      traefik.http.routers.portainer-edge-secure.rule: "Host(`portainer-edge.{{ domain }}`)"
+      traefik.http.routers.portainer-edge-secure.tls: "true"
+      traefik.http.routers.portainer-edge-secure.service: "portainer-edge-svc"
+      traefik.http.services.portainer-edge-svc.loadBalancer.server.port: "8000"
+      traefik.http.routers.portainer-edge-secure.tls.certresolver: letsencrypt
+      traefik.http.routers.portainer-edge-secure.tls.domains[0].main: "{{ domain }}"
+      traefik.http.routers.portainer-edge-secure.tls.domains[0].sans: "*.{{ domain }}"
+
+      traefik.docker.network: homelab

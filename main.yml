@@ -49,10 +49,10 @@
   - role: services
     tags: services
 
-- role: vitalk.secure-ssh
+  - role: vitalk.secure-ssh
     tags: ssh
     ssh_user: "{{ ansible_ssh_user }}"
     ssh_identity_key: "{{ ssh_identity_key_path }}"
-
+  
   - role: security
     tags: security

@@ -1,0 +1,27 @@
+- name: Create the Uptime Kuma backend volumes
+  docker_volume:
+    name: uptime-kuma
+    state: present
+    driver: local
+
+- name: Create Uptime Kuma Docker container
+  community.docker.docker_container:
+    name: uptime-kuma
+    image: louislam/uptime-kuma:1
+    state: started
+    restart_policy: unless-stopped
+    volumes:
+      - "uptime-kuma:/app/data"
+    networks:
+      - name: homelab
+    labels:
+      traefik.enable: "true"
+      traefik.http.routers.uptime-kuma-secure.entrypoints: "https"
+      traefik.http.routers.uptime-kuma-secure.rule: "Host(`status.{{ domain }}`)"
+      traefik.http.routers.uptime-kuma-secure.tls: "true"
+      traefik.http.routers.uptime-kuma-secure.service: "uptime-kuma-svc"
+      traefik.http.services.uptime-kuma-svc.loadBalancer.server.port: "3001"
+      traefik.http.routers.uptime-kuma-secure.tls.certresolver: letsencrypt
+      traefik.http.routers.uptime-kuma-secure.tls.domains[0].main: "{{ domain }}"
+      traefik.http.routers.uptime-kuma-secure.tls.domains[0].sans: "*.{{ domain }}"
+      traefik.docker.network: homelab

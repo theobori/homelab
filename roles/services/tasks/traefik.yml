@@ -1,16 +1,16 @@
-- name: Create the traefik application directory
+- name: Create the Traefik application directory
   ansible.builtin.file:
     path: "{{ docker_dir }}/traefik/data"
     state: directory
     mode: 0755
 
-- name: Copy traefik.yml configuration file
+- name: Copy Traefik configuration file
   ansible.builtin.template:
     src: traefik/traefik.yml.j2
     dest: "{{ docker_dir }}/traefik/data/traefik.yml"
     mode: '0644'
 
-- name: Copy traefik configuration directory
+- name: Copy Traefik configuration directory
   ansible.builtin.copy:
     src: traefik/conf
     dest: "{{ docker_dir }}/traefik/data"

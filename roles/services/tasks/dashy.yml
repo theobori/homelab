@@ -1,0 +1,39 @@
+- name: Create the Dashy application directory
+  ansible.builtin.file:
+    path: "{{ docker_dir }}/dashy/data"
+    state: directory
+    mode: 0755
+
+- name: Copy Dashy configuration file
+  ansible.builtin.template:
+    src: dashy/my-conf.yml.j2
+    dest: "{{ docker_dir }}/dashy/data/my-conf.yml"
+    mode: '0644'
+
+- name: Create Dash Docker container
+  community.docker.docker_container:
+    name: dashy
+    image: lissy93/dashy:latest
+    state: started
+    restart_policy: unless-stopped
+    volumes:
+      - "{{ docker_dir }}/dashy/data/my-conf.yml:/app/user-data/conf.yml"
+    networks:
+      - name: homelab
+    healthcheck:
+      test: ['CMD', 'node', '/app/services/healthcheck']
+      interval: 1m30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    labels:
+      traefik.enable: "true"
+      traefik.http.routers.dashy-secure.entrypoints: "https"
+      traefik.http.routers.dashy-secure.rule: "Host(`{{ domain }}`)"
+      traefik.http.routers.dashy-secure.tls: "true"
+      traefik.http.routers.dashy-secure.service: "dashy-svc"
+      traefik.http.services.dashy-svc.loadBalancer.server.port: "8080"
+      traefik.http.routers.dashy-secure.tls.certresolver: letsencrypt
+      traefik.http.routers.dashy-secure.tls.domains[0].main: "{{ domain }}"
+      traefik.http.routers.dashy-secure.tls.domains[0].sans: "*.{{ domain }}"
+      traefik.docker.network: homelab

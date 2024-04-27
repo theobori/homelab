@@ -6,5 +6,6 @@
     - authentik
     - portainer
     - uptime_kuma
+    - dashy
   loop_control:
     loop_var: task_name

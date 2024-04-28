@@ -1,0 +1,33 @@
+- name: Create the Jellyfin directory
+  ansible.builtin.file:
+    path: "{{ docker_dir }}/jellyfin/data/config"
+    state: directory
+    mode: 0755
+
+- name: Create Jellyfin container managed by Docker
+  community.docker.docker_container:
+    name: jellyfin
+    image: lscr.io/linuxserver/jellyfin
+    state: started
+    restart_policy: unless-stopped
+    env:
+      PUID: "1000"
+      PGID: "1000"
+      TZ: "Etc/UTC"
+    volumes:
+      - "{{ docker_dir }}/jellyfin/data/config:/config"
+      - "{{ docker_dir }}/media:/data/media"
+    networks:
+      - name: homelab
+      - name: ldap
+    labels:
+      traefik.enable: "true"
+      traefik.http.routers.jellyfin-secure.entrypoints: "https"
+      traefik.http.routers.jellyfin-secure.rule: "Host(`jellyfin.{{ domain }}`)"
+      traefik.http.routers.jellyfin-secure.tls: "true"
+      traefik.http.routers.jellyfin-secure.service: "jellyfin-svc"
+      traefik.http.services.jellyfin-svc.loadBalancer.server.port: "8096"
+      traefik.http.routers.jellyfin-secure.tls.certresolver: letsencrypt
+      traefik.http.routers.jellyfin-secure.tls.domains[0].main: "{{ domain }}"
+      traefik.http.routers.jellyfin-secure.tls.domains[0].sans: "*.{{ domain }}"
+      traefik.docker.network: homelab

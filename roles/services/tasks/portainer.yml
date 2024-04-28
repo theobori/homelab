@@ -4,7 +4,7 @@
     state: present
     driver: local
 
-- name: Create Portainer Docker container
+- name: Create Portainer container managed by Docker
   community.docker.docker_container:
     name: portainer
     image: portainer/portainer-ce:latest

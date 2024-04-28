@@ -27,7 +27,7 @@
     mode: '0600'
   when: acme_json_stat.stat.exists == false
 
-- name: Create Traefik Docker container
+- name: Create Traefik container managed by Docker
   community.docker.docker_container:
     name: traefik
     image: traefik:latest

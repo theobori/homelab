@@ -7,5 +7,7 @@
     - portainer
     - uptime_kuma
     - dashy
+    - jellyfin
+    - duplicati
   loop_control:
     loop_var: task_name

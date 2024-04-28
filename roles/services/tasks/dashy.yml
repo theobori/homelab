@@ -10,7 +10,7 @@
     dest: "{{ docker_dir }}/dashy/data/my-conf.yml"
     mode: '0644'
 
-- name: Create Dash Docker container
+- name: Create Dashy container managed by Docker
   community.docker.docker_container:
     name: dashy
     image: lissy93/dashy:latest

@@ -4,7 +4,7 @@
     state: present
     driver: local
 
-- name: Create Uptime Kuma Docker container
+- name: Create Uptime Kuma container managed by Docker
   community.docker.docker_container:
     name: uptime-kuma
     image: louislam/uptime-kuma:1

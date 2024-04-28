@@ -1,5 +1,14 @@
-- name: Create a homelab docker network
+- name: Create external Docker networks
   community.docker.docker_network:
-    name: homelab
+    name: "{{ item }}"
     state: present
     driver: bridge
+  loop:
+    - homelab
+    - ldap
+
+- name: Create the external Docker volumes
+  ansible.builtin.file:
+    path: "{{ docker_dir }}/media"
+    state: directory
+    mode: 0755

@@ -1,0 +1,37 @@
+- name: Create the Duplicati application directories
+  ansible.builtin.file:
+    path: "{{ docker_dir }}/duplicati/data/{{ item }}"
+    state: directory
+    mode: 0755
+  loop:
+    - config
+    - backups
+
+- name: Create Duplicati container managed by Docker
+  community.docker.docker_container:
+    name: duplicati
+    image: lscr.io/linuxserver/duplicati:latest
+    state: started
+    restart_policy: unless-stopped
+    volumes:
+      - "{{ docker_dir }}/duplicati/data/config:/config"
+      - "{{ docker_dir }}/duplicati/data/backups:/backups"
+      - "/:/source"
+    networks:
+      - name: homelab
+    env:
+      PUID: "0"
+      PGID: "0"
+      TZ: "Etc/UTC"
+    labels:
+      traefik.enable: "true"
+      traefik.http.routers.duplicati-secure.middlewares: "authentik@file"
+      traefik.http.routers.duplicati-secure.entrypoints: "https"
+      traefik.http.routers.duplicati-secure.rule: "Host(`duplicati.{{ domain }}`)"
+      traefik.http.routers.duplicati-secure.tls: "true"
+      traefik.http.routers.duplicati-secure.service: "duplicati-svc"
+      traefik.http.services.duplicati-svc.loadBalancer.server.port: "8200"
+      traefik.http.routers.duplicati-secure.tls.certresolver: letsencrypt
+      traefik.http.routers.duplicati-secure.tls.domains[0].main: "{{ domain }}"
+      traefik.http.routers.duplicati-secure.tls.domains[0].sans: "*.{{ domain }}"
+      traefik.docker.network: homelab

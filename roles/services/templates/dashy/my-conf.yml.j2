@@ -1,6 +1,6 @@
 pageInfo:
   title: Home lab
-  description: Private homelab dashboard
+  description: Private homelab dashboard ♥️
 
 appConfig:
   theme: colorful
@@ -8,7 +8,6 @@ appConfig:
 
 sections:
 - name: Utilities & Network
-  icon: fa-solid fa-shield
   items:
   - title: Portainer
     icon: hl-portainer
@@ -25,4 +24,15 @@ sections:
   - title: Traefik
     icon: hl-traefik
     url: "https://traefik.{{ domain }}"
+    target: newtab
+  - title: Duplicati
+    icon: hl-duplicati
+    url: "https://duplicati.{{ domain }}"
+    target: newtab
+
+- name: Media & Entertainment
+  items:
+  - title: Jellyfin
+    icon: hl-jellyfin
+    url: "https://jellyfin.{{ domain }}"
     target: newtab

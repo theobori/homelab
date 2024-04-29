@@ -1,30 +1,13 @@
 # Taken from https://github.com/hashbang/shell-server/blob/797cec330b69fcc022581593aba42c0cd4641133/ansible/tasks/profile/main.yml#L97
 - name: Remove default /etc/skel directory
-  block:
-    - name: Create /etc/skel/.profile
-      ansible.builtin.file:
-        path: /etc/skel/.profile
-        state: absent
-
-    - name: Create /etc/skel/.bash_logout
-      ansible.builtin.file:
-        path: /etc/skel/.bash_logout
-        state: absent
-
-    - name: Create /etc/skel/.bashrc
-      ansible.builtin.file:
-        path: /etc/skel/.bashrc
-        state: absent
-
-    - name: Create /etc/skel/.kshrc
-      ansible.builtin.file:
-        path: /etc/skel/.kshrc
-        state: absent
-
-    - name: Create /etc/skel/.mkshrc
-      ansible.builtin.file:
-        path: /etc/skel/.mkshrc
-        state: absent
+  ansible.builtin.file:
+    path: "/etc/skel/{{ item }}"
+    state: absent
+  loop:
+    - .bash_logout
+    - .bashrc
+    - .kshrc
+    - .mkshrc
 
 - name: Override the useradd command configuration
   ansible.builtin.replace:

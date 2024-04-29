@@ -9,5 +9,7 @@
     - dashy
     - jellyfin
     - duplicati
+    - prometheus
+    - grafana
   loop_control:
     loop_var: task_name

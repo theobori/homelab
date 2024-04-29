@@ -1,0 +1,31 @@
+- name: Create the Grafana volumes
+  docker_volume:
+    name: grafana-data
+    state: present
+    driver: local
+
+- name: Create Grafana container managed by Docker
+  community.docker.docker_container:
+    name: grafana
+    image: grafana/grafana-oss:latest
+    state: started
+    restart_policy: unless-stopped
+    volumes:
+      - "grafana-data:/var/lib/grafana"
+    networks:
+      - name: homelab
+      - name: monitoring
+    ports:
+      - "127.0.0.1:3000:3000"
+    labels:
+      traefik.enable: "true"
+      traefik.http.routers.grafana-secure.middlewares: "authentik@file"
+      traefik.http.routers.grafana-secure.entrypoints: "https"
+      traefik.http.routers.grafana-secure.rule: "Host(`grafana.{{ domain }}`)"
+      traefik.http.routers.grafana-secure.tls: "true"
+      traefik.http.routers.grafana-secure.service: "grafana-svc"
+      traefik.http.services.grafana-svc.loadBalancer.server.port: "3000"
+      traefik.http.routers.grafana-secure.tls.certresolver: letsencrypt
+      traefik.http.routers.grafana-secure.tls.domains[0].main: "{{ domain }}"
+      traefik.http.routers.grafana-secure.tls.domains[0].sans: "*.{{ domain }}"
+      traefik.docker.network: homelab

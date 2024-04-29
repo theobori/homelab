@@ -17,10 +17,6 @@ sections:
     url: "https://auth.{{ domain }}"
     icon: https://cf.appdrag.com/dashboard-openvm-clo-b2d42c/uploads/goauthentik-LRFF.png
     target: newtab
-  - title: Uptime Kuma
-    icon: hl-uptime-kuma
-    url: "https://status.{{ domain }}"
-    target: newtab
   - title: Traefik
     icon: hl-traefik
     url: "https://traefik.{{ domain }}"
@@ -28,6 +24,21 @@ sections:
   - title: Duplicati
     icon: hl-duplicati
     url: "https://duplicati.{{ domain }}"
+    target: newtab
+
+- name: Monitoring
+  items:
+  - title: Grafana
+    icon: hl-grafana
+    url: "https://grafana.{{ domain }}"
+    target: newtab
+  - title: Prometheus
+    icon: hl-prometheus
+    url: "https://prometheus.{{ domain }}"
+    target: newtab
+  - title: Uptime Kuma
+    icon: hl-uptime-kuma
+    url: "https://status.{{ domain }}"
     target: newtab
 
 - name: Media & Entertainment

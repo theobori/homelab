@@ -6,6 +6,7 @@
   loop:
     - homelab
     - ldap
+    - monitoring
 
 - name: Create the external Docker volumes
   ansible.builtin.file:

@@ -50,8 +50,8 @@ ansible-galaxy install -r requirements.yml
 #### DuckDNS
 - **`duckdns_token`**: DuckDNS token
 
-#### Let's Encrypt
-- **`letsencrypt_acme_email`**: Let's Encrypt email address
+#### Let"s Encrypt
+- **`letsencrypt_acme_email`**: Let"s Encrypt email address
 
 #### Directory
 - **`base_dir`**: Base directory

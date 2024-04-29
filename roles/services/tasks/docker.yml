@@ -12,4 +12,4 @@
   ansible.builtin.file:
     path: "{{ docker_dir }}/media"
     state: directory
-    mode: 0755
+    mode: "0755"

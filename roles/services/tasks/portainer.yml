@@ -1,5 +1,5 @@
 - name: Create the Portainer backend volumes
-  docker_volume:
+  community.docker.docker_volume:
     name: portainer_data
     state: present
     driver: local

@@ -2,13 +2,13 @@
   ansible.builtin.file:
     path: "{{ docker_dir }}/dashy/data"
     state: directory
-    mode: 0755
+    mode: "0755"
 
 - name: Copy Dashy configuration file
   ansible.builtin.template:
     src: dashy/my-conf.yml.j2
     dest: "{{ docker_dir }}/dashy/data/my-conf.yml"
-    mode: '0644'
+    mode: "0644"
 
 - name: Create Dashy container managed by Docker
   community.docker.docker_container:
@@ -21,7 +21,7 @@
     networks:
       - name: homelab
     healthcheck:
-      test: ['CMD', 'node', '/app/services/healthcheck']
+      test: ["CMD", "node", "/app/services/healthcheck"]
       interval: 1m30s
       timeout: 10s
       retries: 3

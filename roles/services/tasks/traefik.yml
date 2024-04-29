@@ -2,30 +2,31 @@
   ansible.builtin.file:
     path: "{{ docker_dir }}/traefik/data"
     state: directory
-    mode: 0755
+    mode: "0755"
 
 - name: Copy Traefik configuration file
   ansible.builtin.template:
     src: traefik/traefik.yml.j2
     dest: "{{ docker_dir }}/traefik/data/traefik.yml"
-    mode: '0644'
+    mode: "0644"
 
 - name: Copy Traefik configuration directory
   ansible.builtin.copy:
     src: traefik/conf
     dest: "{{ docker_dir }}/traefik/data"
+    mode: "0755"
 
 - name: Check if acme.json file exists
   ansible.builtin.stat:
     path: "{{ docker_dir }}/traefik/data/acme.json"
   register: acme_json_stat
 
-- name: Create acme.json file if it doesn't exist
+- name: Create acme.json file if it doesn"t exist
   ansible.builtin.file:
     path: "{{ docker_dir }}/traefik/data/acme.json"
     state: touch
-    mode: '0600'
-  when: acme_json_stat.stat.exists == false
+    mode: "0600"
+  when: not acme_json_stat.stat.exists
 
 - name: Create Traefik container managed by Docker
   community.docker.docker_container:

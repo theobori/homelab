@@ -1,5 +1,5 @@
 - name: Create the Grafana volumes
-  docker_volume:
+  community.docker.docker_volume:
     name: grafana-data
     state: present
     driver: local

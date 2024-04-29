@@ -2,7 +2,7 @@
   ansible.builtin.file:
     path: "{{ docker_dir }}/jellyfin/data/config"
     state: directory
-    mode: 0755
+    mode: "0755"
 
 - name: Create Jellyfin container managed by Docker
   community.docker.docker_container:

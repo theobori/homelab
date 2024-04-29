@@ -2,16 +2,16 @@
   ansible.builtin.file:
     path: "{{ docker_dir }}/prometheus/data"
     state: directory
-    mode: 0755
+    mode: "0755"
 
 - name: Copy Prometheus configuration file
   ansible.builtin.copy:
     src: prometheus/prometheus.yml
     dest: "{{ docker_dir }}/prometheus/data/prometheus.yml"
-    mode: '0644'
+    mode: "0644"
 
 - name: Create the Prometheus volumes
-  docker_volume:
+  community.docker.docker_volume:
     name: prometheus-data
     state: present
     driver: local
@@ -37,10 +37,10 @@
     state: started
     restart_policy: unless-stopped
     command:
-      - '--path.procfs=/host/proc'
-      - '--path.rootfs=/rootfs'
-      - '--path.sysfs=/host/sys'
-      - '--collector.filesystem.mount-points-exclude=^/(sys|proc|dev|host|etc)($$|/)'
+      - "--path.procfs=/host/proc"
+      - "--path.rootfs=/rootfs"
+      - "--path.sysfs=/host/sys"
+      - "--collector.filesystem.mount-points-exclude=^/(sys|proc|dev|host|etc)($$|/)"
     volumes:
       - "/:/rootfs:ro"
       - "/sys:/host/sys:ro"

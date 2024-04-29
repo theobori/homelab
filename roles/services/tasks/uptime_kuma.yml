@@ -1,5 +1,5 @@
 - name: Create the Uptime Kuma backend volumes
-  docker_volume:
+  community.docker.docker_volume:
     name: uptime-kuma
     state: present
     driver: local

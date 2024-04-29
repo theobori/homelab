@@ -1,5 +1,7 @@
 # 🏡 homelab
 
+[![ansible-lint](https://github.com/theobori/homelab/actions/workflows/ansible-lint.yml/badge.svg)](https://github.com/theobori/homelab/actions/workflows/ansible-lint.yml)
+
 The aim is to use my old laptop as a homelab with a Debian system. All automations and configurations used are declared in this repository.
 
 ## 📖 How to build and run ?

@@ -19,4 +19,4 @@
     - cron
     - gzip
     - make
-    - ufw # Preventing weareinteractive.ufw 
+    - ufw # Preventing weareinteractive.ufw

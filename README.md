@@ -26,35 +26,35 @@ ansible-galaxy install -r requirements.yml
 
 ### Roles
 
-- **`nickjj.docker`**: Setup and configure Docker + docker-compose
-- **`weareinteractive.ufw`**: Setup the network firewall and configure it
-- **`shell`**: Setup a shell environment with fish + tmux
-- **`base`**: Install basics needed packages for the other roles
-- **`profile`**: Setup some default configuration for new users
+- **`nickjj.docker`**: Setup and configure Docker + docker-compose.
+- **`weareinteractive.ufw`**: Setup the network firewall and configure it.
+- **`shell`**: Setup a shell environment with fish + tmux.
+- **`base`**: Install basics needed packages for the other roles.
+- **`profile`**: Setup some default configuration for new users.
 - **`security`**: Setup system security tools/services like ssh, knockd, etc.
-- **`services`**: Create the Docker resources (containers, volumes, network, etc..)
+- **`services`**: Create the Docker resources (containers, volumes, network, etc..).
 
 ### Variables
 
 #### SSH
-- **`ssh_identity_key_path`**: SSH public key used to auth
-- **`ssh_port`**: Change the default SSH port
+- **`ssh_identity_key_path`**: SSH public key used to auth.
+- **`ssh_port`**: Change the default SSH port.
 
 #### Domain
-- **`domain`**: The server domain, must be formatted as "domain.tld"
+- **`domain`**: The server domain, must be formatted as "domain.tld".
 
 #### Authentik
-- **`authentik_pg_db`**: Authentik PosgreSQL database
-- **`authentik_pg_user`**: Authentik PosgreSQL username
-- **`authentik_pg_password`**: Authentik PosgreSQL password
-- **`authentik_secret_key`**: Authentik secret key
+- **`authentik_pg_db`**: Authentik PosgreSQL database.
+- **`authentik_pg_user`**: Authentik PosgreSQL username.
+- **`authentik_pg_password`**: Authentik PosgreSQL password.
+- **`authentik_secret_key`**: Authentik secret key.
 
 #### DuckDNS
-- **`duckdns_token`**: DuckDNS token
+- **`duckdns_token`**: DuckDNS token.
 
 #### Let"s Encrypt
-- **`letsencrypt_acme_email`**: Let"s Encrypt email address
+- **`letsencrypt_acme_email`**: Let"s Encrypt email address.
 
 #### Directory
-- **`base_dir`**: Base directory
-- **`docker_dir`**: Docker directory
+- **`base_dir`**: Base directory.
+- **`docker_dir`**: Docker directory.

@@ -58,3 +58,9 @@ ansible-galaxy install -r requirements.yml
 #### Directory
 - **`base_dir`**: Base directory.
 - **`docker_dir`**: Docker directory.
+
+#### Nextcloud
+- **`nextcloud_db_name:`**: Nextcloud database name.
+- **`nextcloud_db_username:`**: Nextcloud database username.
+- **`nextcloud_db_password:`**: Nextcloud database password.
+- **`nextcloud_db_root_password:`**: Nextcloud database root password.

@@ -5,11 +5,12 @@
     - traefik
     - authentik
     - portainer
-    - uptime_kuma
     - dashy
     - jellyfin
     - duplicati
     - prometheus
     - grafana
+    - nextcloud
+    - uptime_kuma
   loop_control:
     loop_var: task_name

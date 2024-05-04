@@ -15,8 +15,6 @@
     networks:
       - name: homelab
       - name: monitoring
-    ports:
-      - "127.0.0.1:3000:3000"
     labels:
       traefik.enable: "true"
       traefik.http.routers.grafana-secure.middlewares: "authentik@file"

@@ -12,5 +12,6 @@
     - grafana
     - nextcloud
     - uptime_kuma
+    - wireguard
   loop_control:
     loop_var: task_name

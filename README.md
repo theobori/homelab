@@ -64,3 +64,8 @@ ansible-galaxy install -r requirements.yml
 - **`nextcloud_db_username:`**: Nextcloud database username.
 - **`nextcloud_db_password:`**: Nextcloud database password.
 - **`nextcloud_db_root_password:`**: Nextcloud database root password.
+
+#### Wireguard
+
+- **`wg_password`**: Wireguard web admin panel password.
+- **`wg_host`**: Wireguard public IP address.

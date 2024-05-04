@@ -5,6 +5,10 @@ pageInfo:
 appConfig:
   theme: colorful
   disableConfiguration: true
+  hideComponents:
+    hideSettings: true
+    hideFooter: true
+    hideNav: true
 
 sections:
 - name: Utilities & Network
@@ -24,6 +28,10 @@ sections:
   - title: Duplicati
     icon: hl-duplicati
     url: "https://duplicati.{{ domain }}"
+    target: newtab
+  - title: Wireguard
+    icon: hl-wireguard
+    url: "https://wireguard.{{ domain }}"
     target: newtab
 
 - name: Monitoring

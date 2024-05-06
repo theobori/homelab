@@ -69,3 +69,7 @@ ansible-galaxy install -r requirements.yml
 
 - **`wg_password`**: Wireguard web admin panel password.
 - **`wg_host`**: Wireguard public IP address.
+
+#### LibreSpeed
+
+- **`librespeed_password`**: LibreSpeed password.

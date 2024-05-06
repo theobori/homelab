@@ -13,5 +13,6 @@
     - nextcloud
     - uptime_kuma
     - wireguard
+    - librespeed
   loop_control:
     loop_var: task_name

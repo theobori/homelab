@@ -73,3 +73,16 @@ ansible-galaxy install -r requirements.yml
 #### LibreSpeed
 
 - **`librespeed_password`**: LibreSpeed password.
+
+#### Mailer
+
+- **`mailer_smtp_host`**: Mailer SMTP host.
+- **`mailer_smtp_from`**: Mailer SMTP email address.
+- **`mailer_smtp_port`**: Mailer SMTP port.
+- **`mailer_smtp_security`**: Mailer SMTP, force_tls or start_tls.
+- **`mailer_smtp_username`**: Mailer SMTP username.
+- **`mailer_smtp_password`**: Mailer SMTP password.
+
+#### Vaultwarden
+
+- **`vaultwarden_admin_token`**: Vaultwarden admin token.

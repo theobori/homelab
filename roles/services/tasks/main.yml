@@ -14,5 +14,6 @@
     - uptime_kuma
     - wireguard
     - librespeed
+    - vaultwarden
   loop_control:
     loop_var: task_name

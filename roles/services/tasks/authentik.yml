@@ -1,0 +1,109 @@
+- name: Create the Authentik application directory
+  ansible.builtin.file:
+    path: "{{ docker_dir }}/authentik/data"
+    state: directory
+    mode: "0755"
+
+- name: Create the Authentik backend Docker volumes
+  community.docker.docker_volume:
+    name: "authentik-{{ item }}"
+    state: present
+    driver: local
+  loop:
+    - database
+    - redis
+
+- name: Create a Authentik backend Docker network
+  community.docker.docker_network:
+    name: authentik-backend
+    state: present
+    driver: bridge
+
+- name: Create PostgreSQL container for Authentik managed by Docker
+  community.docker.docker_container:
+    name: authentik-postgresql
+    image: postgres:12-alpine
+    state: started
+    restart_policy: unless-stopped
+    env:
+      POSTGRES_PASSWORD: "{{ authentik_pg_password }}"
+      POSTGRES_USER: "{{ authentik_pg_user | default('authentik') }}"
+      POSTGRES_DB: "{{ authentik_pg_db | default('authentik') }}"
+    volumes:
+      - authentik-database:/var/lib/postgresql/data
+    networks:
+      - name: authentik-backend
+
+- name: Create Redis container for Authentik managed by Docker
+  community.docker.docker_container:
+    name: authentik-redis
+    image: redis:alpine
+    state: started
+    restart_policy: unless-stopped
+    command: "--save 60 1 --loglevel warning"
+    healthcheck:
+      test: ["CMD-SHELL", "redis-cli ping | grep PONG"]
+      start_period: 20s
+      interval: 30s
+      retries: 5
+      timeout: 3s
+    volumes:
+      - authentik-redis:/data
+    networks:
+      - name: authentik-backend
+
+- name: Create Authentik server container managed by Docker
+  community.docker.docker_container:
+    name: authentik-server
+    image: "ghcr.io/goauthentik/server:2024.4.0"
+    state: started
+    restart_policy: unless-stopped
+    command: server
+    env:
+      AUTHENTIK_REDIS__HOST: authentik-redis
+      AUTHENTIK_POSTGRESQL__HOST: authentik-postgresql
+      AUTHENTIK_POSTGRESQL__USER: "{{ authentik_pg_user | default('authentik') }}"
+      AUTHENTIK_POSTGRESQL__NAME: "{{ authentik_pg_db | default('authentik') }}"
+      AUTHENTIK_POSTGRESQL__PASSWORD: "{{ authentik_pg_password }}"
+      AUTHENTIK_SECRET_KEY: "{{ authentik_secret_key }}"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - "{{ docker_dir }}/authentik/data/media:/media"
+      - "{{ docker_dir }}/authentik/data/custom-templates:/templates"
+    networks:
+      - name: authentik-backend
+      - name: homelab
+    labels:
+      traefik.enable: "true"
+      traefik.http.routers.authentik-secure.entrypoints: "https"
+      traefik.http.routers.authentik-secure.rule: "Host(`auth.{{ domain }}`)"
+      traefik.http.routers.authentik-secure.tls: "true"
+      traefik.http.routers.authentik-secure.service: "authentik-svc"
+      traefik.http.services.authentik-svc.loadBalancer.server.port: "9000"
+      traefik.http.routers.authentik-secure.tls.certresolver: letsencrypt
+      traefik.http.routers.authentik-secure.tls.domains[0].main: "{{ domain }}"
+      traefik.http.routers.authentik-secure.tls.domains[0].sans: "*.{{ domain }}"
+      traefik.docker.network: homelab
+
+- name: Create Authentik worker container managed by Docker
+  community.docker.docker_container:
+    name: authentik-worker
+    image: "ghcr.io/goauthentik/server:2024.4.0"
+    state: started
+    restart_policy: unless-stopped
+    command: worker
+    env:
+      AUTHENTIK_REDIS__HOST: authentik-redis
+      AUTHENTIK_POSTGRESQL__HOST: authentik-postgresql
+      AUTHENTIK_POSTGRESQL__USER: "{{ authentik_pg_user | default('authentik') }}"
+      AUTHENTIK_POSTGRESQL__NAME: "{{ authentik_pg_db | default('authentik') }}"
+      AUTHENTIK_POSTGRESQL__PASSWORD: "{{ authentik_pg_password }}"
+      AUTHENTIK_SECRET_KEY: "{{ authentik_secret_key }}"
+    user: root
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - "{{ docker_dir }}/authentik/data/media:/media"
+      - "{{ docker_dir }}/authentik/data/certs:/certs"
+      - "{{ docker_dir }}/authentik/data/custom-templates:/templates"
+    networks:
+      - name: authentik-backend

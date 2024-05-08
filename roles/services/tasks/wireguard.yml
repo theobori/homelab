@@ -1,0 +1,39 @@
+- name: Create the Wireguard application directories
+  ansible.builtin.file:
+    path: "{{ docker_dir }}/wireguard/data/config"
+    state: directory
+    mode: "0755"
+
+- name: Create Wireguard container managed by Docker
+  community.docker.docker_container:
+    name: wireguard
+    image: weejewel/wg-easy
+    sysctls:
+      "net.ipv4.ip_forward": "1"
+      "net.ipv4.conf.all.src_valid_mark": "1"
+    capabilities:
+      - NET_ADMIN
+      - SYS_MODULE
+    state: started
+    env:
+      "PASSWORD": "{{ wg_password }}"
+      "WG_HOST": "{{ wg_host }}"
+    ports:
+      - "51820:51820/udp"
+    volumes:
+      - "{{ docker_dir }}/wireguard/data/config:/etc/wireguard"
+    restart_policy: unless-stopped
+    networks:
+      - name: homelab
+    labels:
+      traefik.enable: "true"
+      traefik.http.routers.wg-easy-secure.middlewares: "authentik@file"
+      traefik.http.routers.wg-easy-secure.entrypoints: "https"
+      traefik.http.routers.wg-easy-secure.rule: "Host(`wireguard.{{ domain }}`)"
+      traefik.http.routers.wg-easy-secure.tls: "true"
+      traefik.http.routers.wg-easy-secure.service: "wg-easy-svc"
+      traefik.http.services.wg-easy-svc.loadBalancer.server.port: "51821"
+      traefik.http.routers.wg-easy-secure.tls.certresolver: letsencrypt
+      traefik.http.routers.wg-easy-secure.tls.domains[0].main: "{{ domain }}"
+      traefik.http.routers.wg-easy-secure.tls.domains[0].sans: "*.{{ domain }}"
+      traefik.docker.network: homelab

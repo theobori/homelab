@@ -1,0 +1,98 @@
+- name: Create the Nextcloud application directories
+  ansible.builtin.file:
+    path: "{{ docker_dir }}/nextcloud/data/{{ item }}"
+    state: directory
+    mode: "0755"
+  loop:
+    - html
+    - custom_apps
+    - config
+    - data
+
+- name: Create the Nextcloud backend Docker volumes
+  community.docker.docker_volume:
+    name: "nextcloud-{{ item }}"
+    state: present
+    driver: local
+  loop:
+    - database
+    - redis
+
+- name: Create a Nextcloud backend Docker network
+  community.docker.docker_network:
+    name: nextcloud-backend
+    state: present
+    driver: bridge
+
+- name: Create MariaDB container for Nextcloud managed by Docker
+  community.docker.docker_container:
+    name: nextcloud-mariadb
+    image: mariadb
+    state: started
+    restart_policy: unless-stopped
+    env:
+      MYSQL_ROOT_PASSWORD: "{{ nextcloud_db_root_password }}"
+      MYSQL_USER: "{{ nextcloud_db_username }}"
+      MYSQL_PASSWORD: "{{ nextcloud_db_password }}"
+      MYSQL_DATABASE: "{{ nextcloud_db_name }}"
+    command: "--transaction-isolation=READ-COMMITTED --binlog-format=ROW"
+    volumes:
+      - "nextcloud-database:/var/lib/mysql"
+    networks:
+      - name: nextcloud-backend
+
+- name: Create Redis container for Nextcloud managed by Docker
+  community.docker.docker_container:
+    name: nextcloud-redis
+    image: "redis:alpine"
+    state: started
+    restart_policy: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "redis-cli ping | grep PONG"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    volumes:
+      - "nextcloud-redis:/data"
+    networks:
+      - name: nextcloud-backend
+
+- name: Create Nextcloud container managed by Docker
+  community.docker.docker_container:
+    name: nextcloud
+    image: nextcloud
+    state: started
+    restart_policy: unless-stopped
+    volumes:
+      - "{{ docker_dir }}/nextcloud/data/html:/var/www/html"
+      - "{{ docker_dir }}/nextcloud/data/custom_apps:/var/www/html/custom_apps"
+      - "{{ docker_dir }}/nextcloud/data/config:/var/www/html/config"
+      - "{{ docker_dir }}/nextcloud/data/data:/var/www/html/data"
+    networks:
+      - name: homelab
+      - name: nextcloud-backend
+      - name: ldap
+    env:
+      MYSQL_DATABASE: "{{ nextcloud_db_name }}"
+      MYSQL_USER: "{{ nextcloud_db_username }}"
+      MYSQL_PASSWORD: "{{ nextcloud_db_password }}"
+      MYSQL_HOST: "nextcloud-mariadb"
+      REDIS_HOST: "nextcloud-redis"
+    labels:
+      traefik.enable: "true"
+      traefik.http.routers.nextcloud-secure.entrypoints: "https"
+      traefik.http.routers.nextcloud-secure.rule: "Host(`cloud.{{ domain }}`)"
+      traefik.http.routers.nextcloud-secure.tls: "true"
+      traefik.http.routers.nextcloud-secure.service: "nextcloud-svc"
+      traefik.http.services.nextcloud-svc.loadBalancer.server.port: "80"
+      traefik.http.routers.nextcloud-secure.tls.certresolver: letsencrypt
+      traefik.http.routers.nextcloud-secure.tls.domains[0].main: "{{ domain }}"
+      traefik.http.routers.nextcloud-secure.tls.domains[0].sans: "*.{{ domain }}"
+      traefik.http.routers.nextcloud-secure.middlewares: "nextcloud-headers, nextclout-re"
+      traefik.http.middlewares.nextclout-re.redirectregex.permanent: "true"
+      traefik.http.middlewares.nextclout-re.redirectregex.regex: "/.well-known/(card|cal)dav"
+      traefik.http.middlewares.nextclout-re.redirectregex.replacement: "/remote.php/dav/"
+      traefik.http.middlewares.nextcloud-headers.headers.stsSeconds: "15552000"
+      traefik.http.middlewares.nextcloud-headers.headers.stsIncludeSubdomains: "true"
+      traefik.http.middlewares.nextcloud-headers.headers.stsPreload: "true"
+      traefik.docker.network: homelab

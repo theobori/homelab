@@ -65,6 +65,14 @@ ansible-galaxy install -r requirements.yml
 - **`nextcloud_db_password:`**: Nextcloud database password.
 - **`nextcloud_db_root_password:`**: Nextcloud database root password.
 
+#### Owncloud (Disabled by default)
+- **`owncloud_mysql_database`**: owncloud mysql database.
+- **`owncloud_mysql_user`**: owncloud mysql user.
+- **`owncloud_mysql_password`**: owncloud mysql password.
+- **`owncloud_mysql_root_password`**: owncloud mysql root password.
+- **`owncloud_admin_username`**: owncloud admin username.
+- **`owncloud_admin_password`**: owncloud admin password.
+
 #### Wireguard
 
 - **`wg_password`**: Wireguard web admin panel password.

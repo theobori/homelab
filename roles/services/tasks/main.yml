@@ -11,6 +11,7 @@
     - prometheus
     - grafana
     - nextcloud
+    # - owncloud
     - uptime_kuma
     - wireguard
     - librespeed

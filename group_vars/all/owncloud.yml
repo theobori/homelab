@@ -1,0 +1,6 @@
+owncloud_mysql_database: "owncloud_mysql_database"
+owncloud_mysql_user: "owncloud_mysql_user"
+owncloud_mysql_password: "owncloud_mysql_password"
+owncloud_mysql_root_password: "owncloud_mysql_root_password"
+owncloud_admin_username: "owncloud_admin_username"
+owncloud_admin_password: "owncloud_admin_password"

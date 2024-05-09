@@ -1,0 +1,104 @@
+- name: Create the Owncloud application directory
+  ansible.builtin.file:
+    path: "{{ docker_dir }}/owncloud/data/files"
+    state: directory
+    mode: "0755"
+
+- name: Create the Owncloud backend Docker volumes
+  community.docker.docker_volume:
+    name: "owncloud-{{ item }}"
+    state: present
+    driver: local
+  loop:
+    - database
+    - redis
+
+- name: Create a Owncloud backend Docker network
+  community.docker.docker_network:
+    name: owncloud-backend
+    state: present
+    driver: bridge
+
+- name: Create PostgreSQL container for Owncloud managed by Docker
+  community.docker.docker_container:
+    name: owncloud-mariadb
+    image: mariadb:10.11
+    state: started
+    restart_policy: unless-stopped
+    env:
+      MYSQL_ROOT_PASSWORD: "{{ owncloud_mysql_root_password }}"
+      MYSQL_USER: "{{ owncloud_mysql_user }}"
+      MYSQL_PASSWORD: "{{ owncloud_mysql_password }}"
+      MYSQL_DATABASE: "{{ owncloud_mysql_database }}"
+      MARIADB_AUTO_UPGRADE: "1"
+    command:
+      - "--max-allowed-packet=128M"
+      - "--innodb-log-file-size=64M"
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-u", "root", "--password={{ owncloud_mysql_root_password }}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    volumes:
+      - owncloud-database:/var/lib/mysql
+    networks:
+      - name: owncloud-backend
+
+- name: Create Redis container for Owncloud managed by Docker
+  community.docker.docker_container:
+    name: owncloud-redis
+    image: redis:6
+    state: started
+    restart_policy: unless-stopped
+    command: ["--databases", "1"]
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    volumes:
+      - owncloud-redis:/data
+    networks:
+      - name: owncloud-backend
+
+- name: Create owncloud server container managed by Docker
+  community.docker.docker_container:
+    name: owncloud-server
+    image: "owncloud/server:10.14"
+    state: started
+    restart_policy: unless-stopped
+    env:
+      OWNCLOUD_DOMAIN: "owncloud.{{ domain }}"
+      OWNCLOUD_TRUSTED_DOMAINS: "owncloud.{{ domain }}"
+      OWNCLOUD_DB_TYPE: "mysql"
+      OWNCLOUD_DB_NAME: "{{ owncloud_mysql_database }}"
+      OWNCLOUD_DB_USERNAME: "{{ owncloud_mysql_user }}"
+      OWNCLOUD_DB_PASSWORD: "{{ owncloud_mysql_password }}"
+      OWNCLOUD_DB_HOST: "owncloud-mariadb"
+      OWNCLOUD_ADMIN_USERNAME: "{{ owncloud_admin_username }}"
+      OWNCLOUD_ADMIN_PASSWORD: "{{ owncloud_admin_password }}"
+      OWNCLOUD_MYSQL_UTF8MB4: "true"
+      OWNCLOUD_REDIS_ENABLED: "true"
+      OWNCLOUD_REDIS_HOST: "owncloud-redis"
+    healthcheck:
+      test: ["CMD", "/usr/bin/healthcheck"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+    volumes:
+      - "{{ docker_dir }}/owncloud/data/files:/mnt/data"
+    networks:
+      - name: owncloud-backend
+      - name: homelab
+      - name: ldap
+    labels:
+      traefik.enable: "true"
+      traefik.http.routers.owncloud-secure.entrypoints: "https"
+      traefik.http.routers.owncloud-secure.rule: "Host(`owncloud.{{ domain }}`)"
+      traefik.http.routers.owncloud-secure.tls: "true"
+      traefik.http.routers.owncloud-secure.service: "owncloud-svc"
+      traefik.http.services.owncloud-svc.loadBalancer.server.port: "8080"
+      traefik.http.routers.owncloud-secure.tls.certresolver: letsencrypt
+      traefik.http.routers.owncloud-secure.tls.domains[0].main: "{{ domain }}"
+      traefik.http.routers.owncloud-secure.tls.domains[0].sans: "*.{{ domain }}"
+      traefik.docker.network: homelab

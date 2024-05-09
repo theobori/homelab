@@ -15,5 +15,10 @@
     - wireguard
     - librespeed
     - vaultwarden
+    - prowlarr
+    - radarr
+    - sonarr
+    - jellyseerr
+    - qbittorrent
   loop_control:
     loop_var: task_name

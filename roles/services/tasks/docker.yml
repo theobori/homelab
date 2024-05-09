@@ -10,6 +10,8 @@
 
 - name: Create the external Docker volumes
   ansible.builtin.file:
-    path: "{{ docker_dir }}/media"
+    path: "{{ media_dir }}"
     state: directory
     mode: "0755"
+    owner: 1000
+    group: 1000

@@ -1,0 +1,45 @@
+- name: Create the Sonarr directories
+  ansible.builtin.file:
+    path: "{{ docker_dir }}/sonarr/data/config"
+    state: directory
+    mode: "0755"
+
+- name: Create the Sonarr media subdirectories
+  ansible.builtin.file:
+    path: "{{ media_dir }}/{{ item }}"
+    state: directory
+    mode: "0755"
+    owner: 1000
+    group: 1000
+  loop:
+    - tv
+    - torrents
+
+- name: Create Sonarr container managed by Docker
+  community.docker.docker_container:
+    name: sonarr
+    image: lscr.io/linuxserver/sonarr
+    state: started
+    restart_policy: unless-stopped
+    env:
+      PUID: "1000"
+      PGID: "1000"
+      TZ: "Etc/UTC"
+    volumes:
+      - "{{ docker_dir }}/sonarr/data/config:/config"
+      - "{{ media_dir }}/tv:/tv"
+      - "{{ media_dir }}/torrents:/torrents"
+    networks:
+      - name: homelab
+    labels:
+      traefik.enable: "true"
+      traefik.http.routers.sonarr-secure.middlewares: "authentik@file"
+      traefik.http.routers.sonarr-secure.entrypoints: "https"
+      traefik.http.routers.sonarr-secure.rule: "Host(`sonarr.{{ domain }}`)"
+      traefik.http.routers.sonarr-secure.tls: "true"
+      traefik.http.routers.sonarr-secure.service: "sonarr-svc"
+      traefik.http.services.sonarr-svc.loadBalancer.server.port: "8989"
+      traefik.http.routers.sonarr-secure.tls.certresolver: letsencrypt
+      traefik.http.routers.sonarr-secure.tls.domains[0].main: "{{ domain }}"
+      traefik.http.routers.sonarr-secure.tls.domains[0].sans: "*.{{ domain }}"
+      traefik.docker.network: homelab

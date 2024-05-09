@@ -16,7 +16,7 @@
       TZ: "Etc/UTC"
     volumes:
       - "{{ docker_dir }}/jellyfin/data/config:/config"
-      - "{{ docker_dir }}/media:/data/media"
+      - "{{ media_dir }}:/data/media"
     networks:
       - name: homelab
       - name: ldap

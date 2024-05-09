@@ -1,2 +1,3 @@
 base_dir: /usr/local/homelab
 docker_dir: "{{ base_dir }}/applications"
+media_dir: "{{ base_dir }}/media"

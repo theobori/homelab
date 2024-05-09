@@ -1,0 +1,31 @@
+- name: Create the Jellyseerr directory
+  ansible.builtin.file:
+    path: "{{ docker_dir }}/jellyseerr/data/config"
+    state: directory
+    mode: "0755"
+
+- name: Create Jellyseerr container managed by Docker
+  community.docker.docker_container:
+    name: jellyseerr
+    image: fallenbagel/jellyseerr
+    state: started
+    restart_policy: unless-stopped
+    env:
+      LOG_LEVEL: "debug"
+      TZ: "Etc/UTC"
+    volumes:
+      - "{{ docker_dir }}/jellyseerr/data/config:/app/config"
+    networks:
+      - name: homelab
+    labels:
+      traefik.enable: "true"
+      traefik.http.routers.jellyseerr-secure.middlewares: "authentik@file"
+      traefik.http.routers.jellyseerr-secure.entrypoints: "https"
+      traefik.http.routers.jellyseerr-secure.rule: "Host(`jellyseerr.{{ domain }}`)"
+      traefik.http.routers.jellyseerr-secure.tls: "true"
+      traefik.http.routers.jellyseerr-secure.service: "jellyseerr-svc"
+      traefik.http.services.jellyseerr-svc.loadBalancer.server.port: "5055"
+      traefik.http.routers.jellyseerr-secure.tls.certresolver: letsencrypt
+      traefik.http.routers.jellyseerr-secure.tls.domains[0].main: "{{ domain }}"
+      traefik.http.routers.jellyseerr-secure.tls.domains[0].sans: "*.{{ domain }}"
+      traefik.docker.network: homelab

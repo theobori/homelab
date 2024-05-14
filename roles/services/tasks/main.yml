@@ -21,5 +21,6 @@
     - sonarr
     - jellyseerr
     - qbittorrent
+    - filebrowser
   loop_control:
     loop_var: task_name

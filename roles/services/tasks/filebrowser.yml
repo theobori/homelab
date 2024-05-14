@@ -1,0 +1,24 @@
+- name: Create filebrowser container managed by Docker
+  community.docker.docker_container:
+    name: filebrowser
+    image: hurlenko/filebrowser:latest
+    state: started
+    restart_policy: unless-stopped
+    volumes:
+      - "/:/data"
+    networks:
+      - name: homelab
+    env:
+      FB_BASEURL: /filebrowser
+    labels:
+      traefik.enable: "true"
+      traefik.http.routers.filebrowser-secure.middlewares: "authentik@file"
+      traefik.http.routers.filebrowser-secure.entrypoints: "https"
+      traefik.http.routers.filebrowser-secure.rule: "Host(`filebrowser.{{ domain }}`)"
+      traefik.http.routers.filebrowser-secure.tls: "true"
+      traefik.http.routers.filebrowser-secure.service: "filebrowser-svc"
+      traefik.http.services.filebrowser-svc.loadBalancer.server.port: "8080"
+      traefik.http.routers.filebrowser-secure.tls.certresolver: letsencrypt
+      traefik.http.routers.filebrowser-secure.tls.domains[0].main: "{{ domain }}"
+      traefik.http.routers.filebrowser-secure.tls.domains[0].sans: "*.{{ domain }}"
+      traefik.docker.network: homelab

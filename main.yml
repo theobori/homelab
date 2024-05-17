@@ -24,7 +24,10 @@
           to_port: "80"
         - rule: allow
           to_port: "{{ ssh_port }}"
-
+        # Wireguard
+        - rule: allow
+          to_port: "51820"
+          proto: udp
         # Delete default rule
         - rule: allow
           name: Anywhere

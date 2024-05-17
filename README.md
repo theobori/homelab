@@ -94,3 +94,4 @@ ansible-galaxy install -r requirements.yml
 #### Vaultwarden
 
 - **`vaultwarden_admin_token`**: Vaultwarden admin token.
+- 
